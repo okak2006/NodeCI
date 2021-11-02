@@ -1,0 +1,29 @@
+# tell travis what programming language we use
+language: node_js
+node_js:
+  - '14'
+# VM Image for CI
+dist: trusty
+# Create services
+services:
+  - mongodb
+  - redis-server
+env:
+  # Setting PROCESS.ENV and PROCESS.ENV.PORT
+  - NODE_ENV=ci PORT=3000
+cache:
+  # cache node_modules so we don't have to reinstall all the dependencies everytime code is pushed
+  directories:
+    - node_modules
+    - client/node_modules
+install:
+  - npm install
+  # build is used for prod not dev. port 3000 for express + react when not in dev.
+  - npm run build
+script:
+  # nohup: if the shell is closed, don't kill anything this command creates -> run the server -> run & ... cmd in a shell in the background (subshell). This is linux and different for Windows
+  - nohup npm run start &
+  # pause to allow server to get ready. sleep '3' is an arbitrary number
+  - sleep 3
+  - npm run test
+  # Visit travis website on how to set up and connect to dependencies like Databases, Redis
